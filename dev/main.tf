@@ -32,7 +32,7 @@ resource "azurerm_container_group" "this" {
         }
       }
 
-      # Dynamic volume mounts
+      # Dynamic volumes with Azure File Share configuration
       dynamic "volume" {
         for_each = container.value.volume_mounts
 
@@ -40,21 +40,13 @@ resource "azurerm_container_group" "this" {
           name       = volume.value.name
           mount_path = volume.value.mount_path
           read_only  = volume.value.read_only
+
+          # Azure File Share configuration
+          share_name           = each.value.volumes[volume.key].share_name
+          storage_account_name = local.storage_account_name
+          storage_account_key  = local.storage_account_key
         }
       }
-    }
-  }
-
-  # Dynamic Azure File Share volumes
-  dynamic "volume" {
-    for_each = each.value.volumes
-
-    content {
-      name       = volume.value.name
-      share_name = volume.value.share_name
-
-      storage_account_name = local.storage_account_name
-      storage_account_key  = local.storage_account_key
     }
   }
 
