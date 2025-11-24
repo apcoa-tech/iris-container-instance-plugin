@@ -5,11 +5,11 @@ output "container_groups" {
   description = "Map of all container groups with their details"
   value = {
     for k, cg in azurerm_container_group.this : k => {
-      id           = cg.id
-      name         = cg.name
-      fqdn         = cg.fqdn
-      ip_address   = cg.ip_address
-      location     = cg.location
+      id         = cg.id
+      name       = cg.name
+      fqdn       = cg.fqdn
+      ip_address = cg.ip_address
+      location   = cg.location
     }
   }
 }

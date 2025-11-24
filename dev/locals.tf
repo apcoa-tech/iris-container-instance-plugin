@@ -24,7 +24,7 @@ locals {
     data_2       = "${local.name_prefix}-mqtt-2-data"
     log_1        = "${local.name_prefix}-mqtt-1-log"
     log_2        = "${local.name_prefix}-mqtt-2-log"
-    certs        = "${local.name_prefix}-mqtt-certs"       # Shared
+    certs        = "${local.name_prefix}-mqtt-certs"        # Shared
     bridge_certs = "${local.name_prefix}-mqtt-bridge-certs" # Shared
   }
 
