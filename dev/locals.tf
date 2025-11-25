@@ -48,7 +48,7 @@ locals {
       containers = {
         mosquitto = {
           name   = "mosquitto"
-          image  = "eclipse-mosquitto:2.0.18"
+          image  = "irisacrdev001.azurecr.io/mosquitto:latest"
           cpu    = 1.0
           memory = 1.5
 
@@ -134,7 +134,7 @@ locals {
       containers = {
         mosquitto = {
           name   = "mosquitto"
-          image  = "eclipse-mosquitto:2.0.18"
+          image  = "irisacrdev001.azurecr.io/mosquitto:latest"
           cpu    = 1.0
           memory = 1.5
 

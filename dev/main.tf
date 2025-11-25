@@ -12,6 +12,13 @@ resource "azurerm_container_group" "this" {
   ip_address_type     = each.value.ip_address_type
   dns_name_label      = each.value.dns_name_label
 
+  # ACR authentication - uses admin credentials fetched dynamically
+  image_registry_credential {
+    server   = data.azurerm_container_registry.acr.login_server
+    username = data.azurerm_container_registry.acr.admin_username
+    password = data.azurerm_container_registry.acr.admin_password
+  }
+
   # Dynamic container blocks
   dynamic "container" {
     for_each = each.value.containers

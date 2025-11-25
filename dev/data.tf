@@ -6,6 +6,12 @@ data "azurerm_resource_group" "this" {
   name = var.resource_group_name
 }
 
+# Get ACR credentials dynamically
+data "azurerm_container_registry" "acr" {
+  name                = "irisacrdev001"
+  resource_group_name = var.resource_group_name
+}
+
 # Remote state from iris-blob-storage-plugin
 # Provides: storage account names, keys, and file share details
 data "terraform_remote_state" "blob_storage" {
