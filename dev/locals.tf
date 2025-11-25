@@ -7,12 +7,12 @@ locals {
 
   # Storage account details from remote state
   storage_account_name = try(
-    data.terraform_remote_state.blob_storage.outputs.storage_accounts["mqtt"].name,
+    data.terraform_remote_state.blob_storage.outputs.storage_account_names["primary"],
     null
   )
 
   storage_account_key = try(
-    data.terraform_remote_state.blob_storage.outputs.storage_accounts["mqtt"].primary_access_key,
+    data.terraform_remote_state.blob_storage.outputs.primary_access_keys["primary"],
     null
   )
 
