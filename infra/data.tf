@@ -6,9 +6,9 @@ data "azurerm_resource_group" "this" {
   name = var.resource_group_name
 }
 
-# Get ACR credentials dynamically
+# Get ACR credentials dynamically (environment-aware)
 data "azurerm_container_registry" "acr" {
-  name                = "irisacrdev001"
+  name                = local.acr_name
   resource_group_name = var.resource_group_name
 }
 
@@ -21,7 +21,7 @@ data "terraform_remote_state" "blob_storage" {
     resource_group_name  = "terraform-state-rg"
     storage_account_name = "tfstateirisapcoa"
     container_name       = "tfstate"
-    key                  = "iris-blob-storage-plugin.dev.tfstate"
+    key                  = "blob-storage-plugin.${var.environment}.tfstate"
     use_oidc             = true
   }
 }

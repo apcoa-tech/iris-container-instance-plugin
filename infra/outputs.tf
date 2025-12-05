@@ -45,3 +45,19 @@ output "mqtt_broker_2_endpoint" {
   description = "MQTT broker 2 connection endpoint (FQDN:port)"
   value       = try("${azurerm_container_group.this["mqtt-2"].fqdn}:8883", null)
 }
+
+# Managed Identity outputs
+output "aci_identity_id" {
+  description = "ID of the User-Assigned Managed Identity for ACI"
+  value       = azurerm_user_assigned_identity.aci.id
+}
+
+output "aci_identity_principal_id" {
+  description = "Principal ID of the User-Assigned Managed Identity for ACI"
+  value       = azurerm_user_assigned_identity.aci.principal_id
+}
+
+output "aci_identity_client_id" {
+  description = "Client ID of the User-Assigned Managed Identity for ACI"
+  value       = azurerm_user_assigned_identity.aci.client_id
+}

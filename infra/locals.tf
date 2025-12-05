@@ -5,6 +5,9 @@ locals {
   # Common naming prefix
   name_prefix = "${var.project_name}-${var.environment}"
 
+  # ACR name (environment-aware)
+  acr_name = "${replace(var.project_name, "-", "")}acr${var.environment}001"
+
   # Storage account details from remote state
   storage_account_name = try(
     data.terraform_remote_state.blob_storage.outputs.storage_account_names["primary"],
@@ -48,7 +51,7 @@ locals {
       containers = {
         mosquitto = {
           name   = "mosquitto"
-          image  = "irisacrdev001.azurecr.io/mosquitto:latest"
+          image  = "${local.acr_name}.azurecr.io/mosquitto:latest"
           cpu    = 1.0
           memory = 1.5
 
@@ -134,7 +137,7 @@ locals {
       containers = {
         mosquitto = {
           name   = "mosquitto"
-          image  = "irisacrdev001.azurecr.io/mosquitto:latest"
+          image  = "${local.acr_name}.azurecr.io/mosquitto:latest"
           cpu    = 1.0
           memory = 1.5
 

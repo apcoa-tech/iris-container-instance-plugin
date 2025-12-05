@@ -1,19 +1,19 @@
-name: Terraform Dev
+name: Terraform Prod
 
 on:
   pull_request:
     branches: [main]
     paths:
       - 'infra/*.tf'
-      - 'infra/dev/**'
-      - '.github/workflows/terraform-dev.yml'
+      - 'infra/prod/**'
+      - '.github/workflows/terraform-prod.yml'
 
   push:
     branches: [main]
     paths:
       - 'infra/*.tf'
-      - 'infra/dev/**'
-      - '.github/workflows/terraform-dev.yml'
+      - 'infra/prod/**'
+      - '.github/workflows/terraform-prod.yml'
 
   workflow_dispatch:
 
@@ -23,24 +23,24 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: terraform-dev-${{ github.head_ref || github.ref_name }}
+  group: terraform-prod-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
   TF_VERSION: "1.9.0"
   WORKING_DIR: ./infra
-  ENVIRONMENT: dev
-  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ENVIRONMENT: prod
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID_PROD }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
   ARM_USE_OIDC: true
-  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
 
 jobs:
   terraform:
-    name: Terraform Dev
+    name: Terraform Prod
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'dev' || '' }}
+    environment: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'prod' || '' }}
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
@@ -62,9 +62,9 @@ jobs:
       - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID_PROD }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID_PROD }}
 
       - name: Terraform Init
         id: init
@@ -75,7 +75,7 @@ jobs:
         with:
           scan-type: 'config'
           scan-ref: 'infra'
-          exit-code: '0'
+          exit-code: '1'
           severity: 'HIGH,CRITICAL'
 
       - name: Terraform Validate
@@ -103,7 +103,7 @@ jobs:
               success: '✅',
               failure: '❌',
             };
-            const output = `### Terraform Plan Results - DEV (Container Instance)
+            const output = `### Terraform Plan Results - PROD (Container Instance)
 
             | Step | Status |
             |------|--------|
@@ -113,7 +113,7 @@ jobs:
             | Validate | ${statusEmoji['${{ steps.validate.outcome }}']} \`${{ steps.validate.outcome }}\` |
             | Plan | ${statusEmoji['${{ steps.plan.outcome }}']} \`${{ steps.plan.outcome }}\` |
 
-            **Environment:** DEV
+            **Environment:** PROD
             **Changes detected:** ${hasChanges ? 'Yes' : 'No'}
 
             <details><summary>Plan Output</summary>
@@ -140,16 +140,16 @@ jobs:
       - name: Summary
         run: |
           if [[ "${{ steps.plan.outputs.exitcode }}" == "0" ]]; then
-            echo "## No Infrastructure Changes - DEV (Container Instance)" >> $GITHUB_STEP_SUMMARY
+            echo "## No Infrastructure Changes - PROD (Container Instance)" >> $GITHUB_STEP_SUMMARY
             echo "Terraform detected no changes." >> $GITHUB_STEP_SUMMARY
           elif [[ "${{ steps.plan.outputs.exitcode }}" == "2" && "${{ github.ref }}" == "refs/heads/main" && "${{ github.event_name }}" == "push" ]]; then
-            echo "## Deployment Successful - DEV (Container Instance)" >> $GITHUB_STEP_SUMMARY
+            echo "## Deployment Successful - PROD (Container Instance)" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Outputs" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             terraform output -no-color >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           else
-            echo "## Plan Complete - DEV (Container Instance)" >> $GITHUB_STEP_SUMMARY
+            echo "## Plan Complete - PROD (Container Instance)" >> $GITHUB_STEP_SUMMARY
             echo "Changes detected. Will apply on merge to main." >> $GITHUB_STEP_SUMMARY
           fi

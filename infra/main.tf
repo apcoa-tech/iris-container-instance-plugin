@@ -1,6 +1,22 @@
 # Container Instance Resources
 # This file defines HOW to create container instances (iterates over locals.tf)
 
+# User-Assigned Managed Identity for ACR authentication
+# Required because ACI with System-Assigned identity has limitations for ACR image pulls
+resource "azurerm_user_assigned_identity" "aci" {
+  name                = "${var.project_name}-aci-identity-${var.environment}"
+  location            = var.location
+  resource_group_name = data.azurerm_resource_group.this.name
+  tags                = local.common_tags
+}
+
+# Grant AcrPull role to the User-Assigned Managed Identity
+resource "azurerm_role_assignment" "aci_acr_pull" {
+  scope                = data.azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.aci.principal_id
+}
+
 resource "azurerm_container_group" "this" {
   for_each = local.container_instances
 
@@ -12,11 +28,16 @@ resource "azurerm_container_group" "this" {
   ip_address_type     = each.value.ip_address_type
   dns_name_label      = each.value.dns_name_label
 
-  # ACR authentication - uses admin credentials fetched dynamically
+  # Use User-Assigned Managed Identity for ACR authentication (security best practice)
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.aci.id]
+  }
+
+  # ACR authentication using User-Assigned Managed Identity
   image_registry_credential {
-    server   = data.azurerm_container_registry.acr.login_server
-    username = data.azurerm_container_registry.acr.admin_username
-    password = data.azurerm_container_registry.acr.admin_password
+    server                    = data.azurerm_container_registry.acr.login_server
+    user_assigned_identity_id = azurerm_user_assigned_identity.aci.id
   }
 
   # Dynamic container blocks
@@ -58,4 +79,7 @@ resource "azurerm_container_group" "this" {
   }
 
   tags = local.common_tags
+
+  # Ensure role assignment is created before container group tries to pull images
+  depends_on = [azurerm_role_assignment.aci_acr_pull]
 }

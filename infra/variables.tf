@@ -25,7 +25,6 @@ variable "project_name" {
 variable "subscription_id" {
   description = "Azure subscription ID"
   type        = string
-  default     = "c6f2ac08-f21c-4e28-b5c2-dd798051a5f8"
 }
 
 variable "tags" {
